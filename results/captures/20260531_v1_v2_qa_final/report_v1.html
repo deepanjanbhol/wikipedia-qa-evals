@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Eval Executive Report - 20260531_v1_v2_qa_final</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #f4f7fb;
+            --ink: #102235;
+            --muted: #4a627a;
+            --card: #ffffff;
+            --line: #d6e1ed;
+            --good: #1f8f5f;
+            --warn: #b9770e;
+            --bad: #b03052;
+            --accent: #0f6fa8;
+            --accent-2: #1b9aaa;
+            --shadow: 0 10px 28px rgba(16, 34, 53, 0.08);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            background:
+                radial-gradient(circle at 15% 0%, #dfefff, transparent 34%),
+                radial-gradient(circle at 100% 10%, #d8f2ee, transparent 30%),
+                var(--bg);
+            color: var(--ink);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.45;
+        }
+        .wrap { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .hero {
+            background: linear-gradient(120deg, #ffffff 0%, #ebf7ff 60%, #ecfffb 100%);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            padding: 20px 22px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+        }
+        .hero h1 { margin: 0 0 6px; font-size: 1.6rem; letter-spacing: 0.2px; }
+        .muted { color: var(--muted); }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .kpi-card {
+            background: linear-gradient(150deg, #ffffff 0%, #f3fbff 100%);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 12px 14px;
+            box-shadow: 0 4px 14px rgba(16, 34, 53, 0.06);
+        }
+        .kpi-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; }
+        .kpi-value { font-size: 1.48rem; font-weight: 700; color: var(--ink); margin-top: 4px; }
+        .card {
+            background: var(--card);
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            padding: 14px;
+            box-shadow: 0 4px 12px rgba(16, 34, 53, 0.05);
+        }
+        .card-good { border-left: 4px solid var(--good); }
+        .card-risk { border-left: 4px solid var(--bad); }
+        .card h2 { margin: 0 0 10px; font-size: 1.02rem; }
+        .pill {
+            display: inline-block;
+            border: 1px solid #cfe0ef;
+            background: linear-gradient(160deg, #ffffff, #f0f8ff);
+            border-radius: 999px;
+            padding: 3px 11px;
+            margin: 2px;
+            font-size: 0.86rem;
+            color: var(--muted);
+        }
+        .split {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        ul { margin: 0; padding-left: 18px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+        th, td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; }
+        th { background: #eef4fa; }
+        .good { color: var(--good); font-weight: 600; }
+        .bad { color: var(--bad); font-weight: 600; }
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .metric {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 8px;
+            background: #fbfdff;
+        }
+        .metric .k { font-size: 0.78rem; color: var(--muted); }
+        .metric .v { font-size: 1.15rem; font-weight: 700; }
+        .story-list li { margin-bottom: 6px; }
+        .story-headline { font-weight: 600; color: var(--accent); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <section class="hero">
+            <h1>Executive Eval Report</h1>
+            <div class="muted">Run ID: <strong>20260531_v1_v2_qa_final</strong> | Versions: v1</div>
+            <p id="summaryText" class="muted" style="margin-top:8px"></p>
+            <div id="versionPills"></div>
+        </section>
+
+        <section class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-label">Overall Correctness</div>
+                <div class="kpi-value" id="kpiCorrectness">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Overall Faithfulness</div>
+                <div class="kpi-value" id="kpiFaithfulness">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Page Hit Rate</div>
+                <div class="kpi-value" id="kpiPageHit">-</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Abstention Quality</div>
+                <div class="kpi-value" id="kpiAbstention">-</div>
+            </div>
+        </section>
+
+        <section class="split">
+            <div class="card card-good">
+                <h2>What Went Well</h2>
+                <ul id="wentWell"></ul>
+            </div>
+            <div class="card card-risk">
+                <h2>What Did Not Go Well</h2>
+                <ul id="notWell"></ul>
+            </div>
+        </section>
+
+        <section class="card" style="margin-bottom: 12px">
+            <h2>Recommendations</h2>
+            <ul id="recommendations"></ul>
+        </section>
+
+        <section class="card" style="margin-bottom: 12px">
+            <h2>Hillclimb Story</h2>
+            <p class="muted">Stepwise changes across prompt versions using a composite quality score and key metric deltas.</p>
+            <p id="hillclimbDelta" class="story-headline"></p>
+            <ul id="hillclimbStory" class="story-list"></ul>
+            <canvas id="hillclimbChart" height="95"></canvas>
+        </section>
+
+        <section class="grid">
+            <div class="card"><canvas id="qualityChart" height="130"></canvas></div>
+            <div class="card"><canvas id="failureChart" height="130"></canvas></div>
+        </section>
+
+        <section class="card" style="margin-bottom: 12px">
+            <h2>Slice Breakdown (Sliced and Diced)</h2>
+            <p class="muted">Compares correctness, citation support, and retrieval behavior by slice for each version.</p>
+            <canvas id="sliceChart" height="110"></canvas>
+            <div id="sliceTables" style="margin-top:12px"></div>
+        </section>
+
+        <section class="card" style="margin-bottom: 12px">
+            <h2>Complexity Breakdown</h2>
+            <p class="muted">Shows score behavior by complexity level for each version.</p>
+            <canvas id="complexityChart" height="110"></canvas>
+            <div id="complexityTables" style="margin-top:12px"></div>
+        </section>
+    </div>
+
+    <script>
+        const payload = {"run_id": "20260531_v1_v2_qa_final", "versions": ["v1"], "summary": {"executive_summary": "Evaluated 1 version(s): v1. Overall correctness=3.875, completeness=3.792, faithfulness=4.333. Version snapshot: v1: correctness=3.875, citation=4.125, page_hit=0.583", "went_well": ["Citation support is strong (4.125).", "Faithfulness is strong (4.333)."], "not_well": ["Correctness is moderate (3.875).", "Completeness is moderate (3.792).", "Context precision is weak (2.708).", "Context recall is moderate (3.583).", "Retrieval hit rate needs work (0.583).", "Abstention quality pass rate is low (0.75)."], "recommendations": ["Prioritize prompt changes that improve the top failure category and retest across all slices.", "Review low-scoring slice/version combinations to tune decomposition and grounding instructions.", "Track changes with the same dataset and compare per-version reports before promoting a prompt."], "source": "heuristic"}, "overall": {"count": 24, "page_hit_rate": 0.583, "abstention_trigger_rate": 0.083, "abstention_consistency_rate": 0.417, "avg_search_count": 3.875, "faithfulness": 4.333, "answer_relevancy": 4.125, "context_precision": 2.708, "context_recall": 3.583, "correctness": 3.875, "completeness": 3.792, "citation_support": 4.125, "abstention_quality_pass_rate": 0.75, "failure_counts": {"Generation Failure": 1, "No Failure": 6, "Multi-Hop Failure": 2, "Abstention Failure": 8, "Retrieval Failure": 5, "Inefficient Tool Use": 1, "Ambiguity Failure": 1}}, "by_version": {"v1": {"count": 24, "page_hit_rate": 0.583, "abstention_trigger_rate": 0.083, "abstention_consistency_rate": 0.417, "avg_search_count": 3.875, "faithfulness": 4.333, "answer_relevancy": 4.125, "context_precision": 2.708, "context_recall": 3.583, "correctness": 3.875, "completeness": 3.792, "citation_support": 4.125, "abstention_quality_pass_rate": 0.75, "failure_counts": {"Generation Failure": 1, "No Failure": 6, "Multi-Hop Failure": 2, "Abstention Failure": 8, "Retrieval Failure": 5, "Inefficient Tool Use": 1, "Ambiguity Failure": 1}}}, "slice_breakdown_by_version": {"v1": {"adversarial": {"count": 5, "page_hit_rate": 0.4, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 0.0, "avg_search_count": 2.4, "faithfulness": 4.6, "answer_relevancy": 5.0, "context_precision": 2.4, "context_recall": 4.0, "correctness": 5.0, "completeness": 5.0, "citation_support": 4.8, "abstention_quality_pass_rate": 1.0, "failure_counts": {"Abstention Failure": 3, "Retrieval Failure": 2}}, "ambiguous": {"count": 4, "page_hit_rate": 1.0, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 0.0, "avg_search_count": 4.25, "faithfulness": 4.5, "answer_relevancy": 4.5, "context_precision": 3.25, "context_recall": 3.5, "correctness": 3.75, "completeness": 3.5, "citation_support": 2.5, "abstention_quality_pass_rate": 0.75, "failure_counts": {"Abstention Failure": 2, "Inefficient Tool Use": 1, "Ambiguity Failure": 1}}, "comparison": {"count": 4, "page_hit_rate": 0.5, "abstention_trigger_rate": 0.5, "abstention_consistency_rate": 0.5, "avg_search_count": 7.25, "faithfulness": 4.0, "answer_relevancy": 2.0, "context_precision": 2.75, "context_recall": 3.25, "correctness": 2.0, "completeness": 2.0, "citation_support": 4.0, "abstention_quality_pass_rate": 0.25, "failure_counts": {"Abstention Failure": 2, "No Failure": 1, "Retrieval Failure": 1}}, "insufficient_evidence": {"count": 3, "page_hit_rate": 0.333, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 0.0, "avg_search_count": 2.333, "faithfulness": 5.0, "answer_relevancy": 5.0, "context_precision": 1.0, "context_recall": 5.0, "correctness": 5.0, "completeness": 5.0, "citation_support": 5.0, "abstention_quality_pass_rate": 1.0, "failure_counts": {"Retrieval Failure": 2, "Abstention Failure": 1}}, "multi_hop": {"count": 6, "page_hit_rate": 0.667, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 1.0, "avg_search_count": 3.667, "faithfulness": 4.333, "answer_relevancy": 3.833, "context_precision": 3.333, "context_recall": 3.333, "correctness": 3.5, "completeness": 3.5, "citation_support": 4.667, "abstention_quality_pass_rate": 0.667, "failure_counts": {"No Failure": 4, "Multi-Hop Failure": 2}}, "simple_factoid": {"count": 2, "page_hit_rate": 0.5, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 1.0, "avg_search_count": 3.0, "faithfulness": 3.0, "answer_relevancy": 5.0, "context_precision": 3.0, "context_recall": 2.0, "correctness": 4.5, "completeness": 4.0, "citation_support": 3.0, "abstention_quality_pass_rate": 1.0, "failure_counts": {"Generation Failure": 1, "No Failure": 1}}}}, "complexity_breakdown_by_version": {"v1": {"easy": {"count": 3, "page_hit_rate": 0.333, "abstention_trigger_rate": 0.667, "abstention_consistency_rate": 0.333, "avg_search_count": 8.333, "faithfulness": 2.333, "answer_relevancy": 2.333, "context_precision": 2.333, "context_recall": 2.667, "correctness": 2.333, "completeness": 2.333, "citation_support": 2.333, "abstention_quality_pass_rate": 0.333, "failure_counts": {"No Failure": 1, "Abstention Failure": 2}}, "hard": {"count": 9, "page_hit_rate": 0.556, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 0.222, "avg_search_count": 4.111, "faithfulness": 4.222, "answer_relevancy": 4.444, "context_precision": 2.444, "context_recall": 3.222, "correctness": 4.111, "completeness": 4.0, "citation_support": 4.111, "abstention_quality_pass_rate": 0.778, "failure_counts": {"No Failure": 1, "Multi-Hop Failure": 1, "Abstention Failure": 3, "Inefficient Tool Use": 1, "Ambiguity Failure": 1, "Retrieval Failure": 2}}, "medium": {"count": 12, "page_hit_rate": 0.667, "abstention_trigger_rate": 0.0, "abstention_consistency_rate": 0.583, "avg_search_count": 2.583, "faithfulness": 4.917, "answer_relevancy": 4.333, "context_precision": 3.0, "context_recall": 4.083, "correctness": 4.083, "completeness": 4.0, "citation_support": 4.583, "abstention_quality_pass_rate": 0.833, "failure_counts": {"Generation Failure": 1, "Multi-Hop Failure": 1, "No Failure": 4, "Retrieval Failure": 3, "Abstention Failure": 3}}}}};
+
+        function addList(id, values) {
+            const el = document.getElementById(id);
+            el.innerHTML = "";
+            (values || []).forEach(v => {
+                const li = document.createElement('li');
+                li.textContent = String(v);
+                el.appendChild(li);
+            });
+            if (!values || values.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = "No highlights available.";
+                el.appendChild(li);
+            }
+        }
+
+        const summary = payload.summary || {};
+        const overall = payload.overall || {};
+        document.getElementById('summaryText').textContent = summary.executive_summary || '';
+        addList('wentWell', summary.went_well || []);
+        addList('notWell', summary.not_well || []);
+        addList('recommendations', summary.recommendations || []);
+
+        function setKpi(id, value, suffix = '') {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const num = Number(value || 0);
+            el.textContent = `${num.toFixed(2)}${suffix}`;
+        }
+
+        setKpi('kpiCorrectness', overall.correctness, '/5');
+        setKpi('kpiFaithfulness', overall.faithfulness, '/5');
+        setKpi('kpiPageHit', Number(overall.page_hit_rate || 0) * 100, '%');
+        setKpi('kpiAbstention', Number(overall.abstention_quality_pass_rate || 0) * 100, '%');
+
+        const pills = document.getElementById('versionPills');
+        (payload.versions || []).forEach(v => {
+            const s = document.createElement('span');
+            s.className = 'pill';
+            s.textContent = v;
+            pills.appendChild(s);
+        });
+
+        const byVersion = payload.by_version || {};
+        const versions = Object.keys(byVersion);
+
+        function versionOrder(v) {
+            const m = String(v).match(/\d+/);
+            return m ? Number(m[0]) : Number.MAX_SAFE_INTEGER;
+        }
+
+        function compositeScore(agg) {
+            const correctness = Number(agg.correctness || 0);
+            const completeness = Number(agg.completeness || 0);
+            const citation = Number(agg.citation_support || 0);
+            const faithfulness = Number(agg.faithfulness || 0);
+            const ansRel = Number(agg.answer_relevancy || 0);
+            const ctxPrec = Number(agg.context_precision || 0);
+            const ctxRec = Number(agg.context_recall || 0);
+            const pageHit = Number(agg.page_hit_rate || 0) * 5;
+            const abstainQ = Number(agg.abstention_quality_pass_rate || 0) * 5;
+            const components = [
+                correctness,
+                completeness,
+                citation,
+                faithfulness,
+                ansRel,
+                ctxPrec,
+                ctxRec,
+                pageHit,
+                abstainQ,
+            ];
+            const sum = components.reduce((a, b) => a + b, 0);
+            return components.length ? (sum / components.length) : 0;
+        }
+
+        const orderedVersions = [...versions].sort((a, b) => versionOrder(a) - versionOrder(b) || String(a).localeCompare(String(b)));
+        const hillclimbDeltaEl = document.getElementById('hillclimbDelta');
+        const hillclimbStoryEl = document.getElementById('hillclimbStory');
+
+        if (orderedVersions.length < 2) {
+            hillclimbDeltaEl.textContent = 'Need at least two versions to compute hillclimb progress.';
+            const li = document.createElement('li');
+            li.textContent = 'Run with --versions v0 v1 (or more) to generate a stepwise progression story.';
+            hillclimbStoryEl.appendChild(li);
+        } else {
+            const first = orderedVersions[0];
+            const last = orderedVersions[orderedVersions.length - 1];
+            const firstScore = compositeScore(byVersion[first]);
+            const lastScore = compositeScore(byVersion[last]);
+            const totalDelta = lastScore - firstScore;
+            const sign = totalDelta >= 0 ? '+' : '';
+            hillclimbDeltaEl.textContent = `Composite score ${first} -> ${last}: ${sign}${totalDelta.toFixed(3)} (from ${firstScore.toFixed(3)} to ${lastScore.toFixed(3)})`;
+
+            for (let i = 1; i < orderedVersions.length; i++) {
+                const prev = orderedVersions[i - 1];
+                const curr = orderedVersions[i];
+                const p = byVersion[prev] || {};
+                const c = byVersion[curr] || {};
+                const prevComp = compositeScore(p);
+                const currComp = compositeScore(c);
+                const dComp = currComp - prevComp;
+
+                const dCorrect = Number(c.correctness || 0) - Number(p.correctness || 0);
+                const dFaith = Number(c.faithfulness || 0) - Number(p.faithfulness || 0);
+                const dCite = Number(c.citation_support || 0) - Number(p.citation_support || 0);
+                const dHit = Number(c.page_hit_rate || 0) - Number(p.page_hit_rate || 0);
+
+                const deltas = [
+                    ['correctness', dCorrect],
+                    ['faithfulness', dFaith],
+                    ['citation', dCite],
+                    ['page_hit', dHit],
+                ].sort((a, b) => Math.abs(b[1]) - Math.abs(a[1]));
+
+                const topA = deltas[0];
+                const topB = deltas[1];
+                const li = document.createElement('li');
+                const direction = dComp >= 0 ? 'improved' : 'regressed';
+                li.textContent = `${prev} -> ${curr} ${direction} by ${dComp.toFixed(3)} composite; biggest shifts: ${topA[0]} ${topA[1] >= 0 ? '+' : ''}${topA[1].toFixed(3)}, ${topB[0]} ${topB[1] >= 0 ? '+' : ''}${topB[1].toFixed(3)}.`;
+                hillclimbStoryEl.appendChild(li);
+            }
+        }
+
+        const hillclimbScores = orderedVersions.map(v => compositeScore(byVersion[v] || {}));
+        new Chart(document.getElementById('hillclimbChart'), {
+            type: 'line',
+            data: {
+                labels: orderedVersions,
+                datasets: [{
+                    label: 'Composite Score',
+                    data: hillclimbScores,
+                    borderColor: '#0f6fa8',
+                    backgroundColor: 'rgba(15,111,168,0.12)',
+                    tension: 0.22,
+                    fill: true,
+                    pointRadius: 4,
+                }],
+            },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Hillclimb Composite Trend' } },
+                scales: { y: { min: 0, max: 5 } },
+            },
+        });
+
+        const qualityMetrics = [
+            ['correctness', 'Correctness'],
+            ['completeness', 'Completeness'],
+            ['citation_support', 'Citation'],
+            ['faithfulness', 'Faithfulness'],
+            ['answer_relevancy', 'Answer Relevancy'],
+            ['context_precision', 'Context Precision'],
+            ['context_recall', 'Context Recall']
+        ];
+
+        const qDatasets = qualityMetrics.map(([key, label], idx) => {
+            const colors = ['#0d6ea8','#1f8f5f','#b9770e','#b03052','#4e6bd1','#136f63','#7a4bb7'];
+            return {
+                label,
+                data: versions.map(v => Number(byVersion[v][key] || 0)),
+                backgroundColor: colors[idx % colors.length]
+            };
+        });
+
+        new Chart(document.getElementById('qualityChart'), {
+            type: 'bar',
+            data: { labels: versions, datasets: qDatasets },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Quality Metrics by Version' } },
+                scales: { y: { min: 0, max: 5 } }
+            }
+        });
+        const failureSet = new Set();
+        versions.forEach(v => {
+            Object.keys(byVersion[v].failure_counts || {}).forEach(fc => failureSet.add(fc));
+        });
+        const failureCats = Array.from(failureSet).sort();
+        const failureColors = ['#b03052','#d95f02','#7570b3','#1f78b4','#33a02c','#6a3d9a','#e31a1c'];
+
+        const fDatasets = failureCats.map((cat, idx) => {
+            return {
+                label: cat,
+                data: versions.map(v => Number((byVersion[v].failure_counts || {})[cat] || 0)),
+                backgroundColor: failureColors[idx % failureColors.length]
+            };
+        });
+
+        new Chart(document.getElementById('failureChart'), {
+            type: 'bar',
+            data: { labels: versions, datasets: fDatasets },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Failure Distribution by Version' } },
+                scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } }
+            }
+        });
+
+        const sliceBreakdown = payload.slice_breakdown_by_version || {};
+        const sliceNames = Array.from(new Set(
+            Object.values(sliceBreakdown).flatMap(m => Object.keys(m || {}))
+        )).sort();
+
+        const sliceCorrectnessDatasets = versions.map((v, idx) => {
+            const colors = ['#0d6ea8','#1f8f5f','#b9770e','#b03052','#4e6bd1','#136f63','#7a4bb7'];
+            return {
+                label: `${v} correctness`,
+                data: sliceNames.map(s => Number(((sliceBreakdown[v] || {})[s] || {}).correctness || 0)),
+                borderColor: colors[idx % colors.length],
+                backgroundColor: colors[idx % colors.length],
+                fill: false,
+                tension: 0.25
+            };
+        });
+
+        new Chart(document.getElementById('sliceChart'), {
+            type: 'line',
+            data: { labels: sliceNames, datasets: sliceCorrectnessDatasets },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Correctness by Slice and Version' } },
+                scales: { y: { min: 0, max: 5 } }
+            }
+        });
+
+        const sliceTables = document.getElementById('sliceTables');
+        versions.forEach(v => {
+            const vMap = sliceBreakdown[v] || {};
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.marginTop = '10px';
+
+            const h = document.createElement('h2');
+            h.textContent = `Slice Metrics: ${v}`;
+            card.appendChild(h);
+
+            const t = document.createElement('table');
+            t.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Slice</th>
+                        <th>n</th>
+                        <th>Correctness</th>
+                        <th>Citation</th>
+                        <th>Faithfulness</th>
+                        <th>Page Hit</th>
+                        <th>Abstention Quality</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+
+            const tb = t.querySelector('tbody');
+            Object.keys(vMap).sort().forEach(slice => {
+                const a = vMap[slice] || {};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${slice}</td>
+                    <td>${Number(a.count || 0)}</td>
+                    <td>${Number(a.correctness || 0).toFixed(2)}</td>
+                    <td>${Number(a.citation_support || 0).toFixed(2)}</td>
+                    <td>${Number(a.faithfulness || 0).toFixed(2)}</td>
+                    <td>${Number(a.page_hit_rate || 0).toFixed(2)}</td>
+                    <td>${Number(a.abstention_quality_pass_rate || 0).toFixed(2)}</td>
+                `;
+                tb.appendChild(tr);
+            });
+
+            card.appendChild(t);
+            sliceTables.appendChild(card);
+        });
+
+        const complexityBreakdown = payload.complexity_breakdown_by_version || {};
+        const complexityNames = Array.from(new Set(
+            Object.values(complexityBreakdown).flatMap(m => Object.keys(m || {}))
+        )).sort();
+
+        const complexityCorrectnessDatasets = versions.map((v, idx) => {
+            const colors = ['#0d6ea8','#1f8f5f','#b9770e','#b03052','#4e6bd1','#136f63','#7a4bb7'];
+            return {
+                label: `${v} correctness`,
+                data: complexityNames.map(c => Number(((complexityBreakdown[v] || {})[c] || {}).correctness || 0)),
+                borderColor: colors[idx % colors.length],
+                backgroundColor: colors[idx % colors.length],
+                fill: false,
+                tension: 0.25
+            };
+        });
+
+        new Chart(document.getElementById('complexityChart'), {
+            type: 'line',
+            data: { labels: complexityNames, datasets: complexityCorrectnessDatasets },
+            options: {
+                responsive: true,
+                plugins: { title: { display: true, text: 'Correctness by Complexity and Version' } },
+                scales: { y: { min: 0, max: 5 } }
+            }
+        });
+
+        const complexityTables = document.getElementById('complexityTables');
+        versions.forEach(v => {
+            const vMap = complexityBreakdown[v] || {};
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.style.marginTop = '10px';
+
+            const h = document.createElement('h2');
+            h.textContent = `Complexity Metrics: ${v}`;
+            card.appendChild(h);
+
+            const t = document.createElement('table');
+            t.innerHTML = `
+                <thead>
+                    <tr>
+                        <th>Complexity</th>
+                        <th>n</th>
+                        <th>Correctness</th>
+                        <th>Citation</th>
+                        <th>Faithfulness</th>
+                        <th>Page Hit</th>
+                        <th>Abstention Quality</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `;
+
+            const tb = t.querySelector('tbody');
+            Object.keys(vMap).sort().forEach(complexity => {
+                const a = vMap[complexity] || {};
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${complexity}</td>
+                    <td>${Number(a.count || 0)}</td>
+                    <td>${Number(a.correctness || 0).toFixed(2)}</td>
+                    <td>${Number(a.citation_support || 0).toFixed(2)}</td>
+                    <td>${Number(a.faithfulness || 0).toFixed(2)}</td>
+                    <td>${Number(a.page_hit_rate || 0).toFixed(2)}</td>
+                    <td>${Number(a.abstention_quality_pass_rate || 0).toFixed(2)}</td>
+                `;
+                tb.appendChild(tr);
+            });
+
+            card.appendChild(t);
+            complexityTables.appendChild(card);
+        });
+    </script>
+</body>
+</html>

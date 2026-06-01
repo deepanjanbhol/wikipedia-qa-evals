@@ -1,0 +1,25 @@
+# Executive Summary
+
+Source: heuristic
+
+Evaluated 2 version(s): v1, v2. Overall correctness=4.062, completeness=3.938, faithfulness=4.271. Version snapshot: v1: correctness=4.333, citation=4.375, page_hit=0.75 | v2: correctness=3.792, citation=4.042, page_hit=0.708
+
+## What Went Well
+
+- Citation support is strong (4.208).
+- Faithfulness is strong (4.271).
+
+## What Did Not Go Well
+
+- Correctness is moderate (4.062).
+- Completeness is moderate (3.938).
+- Context precision is weak (2.875).
+- Context recall is moderate (3.75).
+- Retrieval hit rate needs work (0.729).
+- Abstention quality pass rate is low (0.771).
+
+## Recommendations
+
+- Prioritize prompt changes that improve the top failure category and retest across all slices.
+- Review low-scoring slice/version combinations to tune decomposition and grounding instructions.
+- Track changes with the same dataset and compare per-version reports before promoting a prompt.
