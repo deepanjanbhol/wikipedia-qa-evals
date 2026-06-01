@@ -1,0 +1,16 @@
+# Python 3.11+
+
+# Core runtime
+anthropic>=0.40.0
+
+# Optional: load .env files for local development
+python-dotenv>=1.0.0
+
+# Optional: Jupyter notebook walkthrough
+jupyter>=1.0.0
+notebook>=7.0.0
+matplotlib>=3.8.0
+pandas>=2.1.0
+numpy>=1.26.0
+
+# RAI checks use Claude safety judge (no Azure dependency required)
