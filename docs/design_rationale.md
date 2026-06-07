@@ -66,7 +66,7 @@ The eval-driven methodology in this project follows a specific pattern: **findin
 
 1. **v0→v1 (prompt hill-climb):** Finding: v0 fails on multi-hop due to single-search constraint. Hypothesis: decomposition + grounding will reduce retrieval failures. Experiment: run v1 on same dataset. Outcome: retrieval failures 7→2, context recall +0.334, search count 1.375→3.042. ✅
 
-2. **v1→v2 (RAI hill-climb):** Finding: v1 has no explicit safety gate; harmful prompts return empty answers (silent safety). Hypothesis: explicit Step 0 RAI gate will produce measurable refusal behavior without regressing QA. Experiment: run v2 on RAI dataset. Outcome: refusal_like_rate 0.0→0.833, expected_pass_rate 0.167→0.750, general_safe pass rate 1.0 (no over-refusal). ✅
+2. **v1→v2 (RAI hill-climb):** Finding: v1 has no explicit safety gate; harmful prompts return empty answers (silent safety). Hypothesis: explicit Step 0 RAI gate will produce measurable refusal behavior without regressing QA. Experiment: run v2 on RAI dataset. Outcome: refusal_like_rate 0.0→0.833, expected_pass_rate 0.167→1.000, general_safe pass rate 1.0 (no over-refusal). ✅
 
 3. **Cross-model validation (eval methodology hill-climb):** Finding: correctness is saturated on Sonnet — the metric cannot distinguish v0 from v1 because parametric knowledge compensates for poor retrieval. Hypothesis: on a weaker model (Haiku), the same prompt improvement should produce a visible correctness delta because parametric knowledge is insufficient. Experiment: re-run v0 and v1 on Haiku with Sonnet as judge. Outcome: correctness delta +0.167 on Haiku (vs 0.000 on Sonnet); context recall delta +0.500; faithfulness +0.166. ✅
 
