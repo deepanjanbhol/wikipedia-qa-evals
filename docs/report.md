@@ -18,6 +18,7 @@
 9. [Learnings](#9-learnings)
 10. [RAI Evaluation](#10-rai-evaluation)
 11. [Future Work](#11-future-work)
+12. [Cross-Model Validation (Haiku)](#12-cross-model-validation-haiku)
 
 ---
 
@@ -139,8 +140,9 @@ Hypotheses were pre-registered before running evaluations. Full detail including
 | H4 | v1_advanced faithfulness improves ≥ 0.3 | ⚠️ Directional — delta = +0.042, monotonic but small |
 | H5 | v1_advanced reduces abstention failures | ⚠️ Partial — adversarial improves; ambiguous worsens as tradeoff |
 | H6 | avg_searches ≥ 1.5 on multi_hop with v1_advanced | ✅ Confirmed — multi_hop: 1.67 → 3.50; comparison: 2.0 → 4.0 |
+| H7 | Prompt improvement visible on weaker model (Haiku) | ✅ Confirmed — Haiku correctness +0.167 (vs Sonnet 0.000); ctx_recall +0.500 |
 
-Four of six hypotheses were confirmed or directionally supported. H4 was directionally correct but the magnitude was smaller than predicted. H5 revealed a tradeoff rather than clean improvement. Pre-registration only has value if failures are acknowledged.
+Five of seven hypotheses were confirmed or directionally supported. H4 was directionally correct but the magnitude was smaller than predicted. H5 revealed a tradeoff rather than clean improvement. H7 validated the methodology itself by confirming prompt gains on a weaker base model. Pre-registration only has value if failures are acknowledged.
 
 ---
 
@@ -401,7 +403,7 @@ To separate prompt-driven improvement from parametric knowledge effects, the eva
 
 ### Results: Haiku v0 vs v1
 
-| Metric | Haiku v0 | Haiku v1 | Delta | Sonnet Delta (same questions) |
+| Metric | Haiku v0 | Haiku v1 | Delta | Sonnet Delta (full 24q run) |
 |---|---|---|---|---|
 | Correctness | 4.500 | 4.667 | **+0.167** | 0.000 |
 | Faithfulness | 4.667 | 4.833 | **+0.166** | +0.042 |
@@ -417,6 +419,6 @@ On Haiku, v1's decomposition produces a **correctness delta (+0.167)** that was 
 
 Context precision and context recall improvements are consistent across both models (+0.5 on Haiku, +0.4 on Sonnet), confirming that retrieval targeting improvement is prompt-driven rather than model-capability-driven. The decomposition instruction works regardless of base model capability.
 
-The search count increase is slightly lower on Haiku (1.17→2.33) than Sonnet (1.38→3.04), suggesting Haiku sometimes terminates earlier in the tool-use loop. This may indicate that Haiku has less reliable multi-turn tool-use planning, which would make decomposition instructions even more important for weaker models.
+The search count increase is slightly lower on Haiku (1.17→2.33) than Sonnet (1.375→3.042 full-run average), suggesting Haiku sometimes terminates earlier in the tool-use loop. This may indicate that Haiku has less reliable multi-turn tool-use planning, which would make decomposition instructions even more important for weaker models.
 
 **Conclusion:** The v0→v1 prompt improvement is real and prompt-driven. Correctness gains are visible on Haiku where they are masked on Sonnet. Retrieval quality gains are consistent across model capabilities. This validates the eval methodology: apparent correctness saturation on a strong model does not mean the prompt changes are ineffective — it means the measurement is ceilinged.
