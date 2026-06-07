@@ -146,7 +146,7 @@ Four of six hypotheses were confirmed or directionally supported. H4 was directi
 
 ## 6. Results
 
-*Dataset: v0.3, 24 questions across 6 slices. n=12 per version per run. All claims directional — at n=4–6 per slice per version, a single question represents a 17–25 percentage point shift.*
+*Dataset: v0.3, 24 questions across 6 slices. n=24 per version per run. All claims directional — at n=4–6 per slice per version, a single question represents a 17–25 percentage point shift.*
 
 ### Version Comparison
 
@@ -327,7 +327,7 @@ Steps 1–5 are identical to v1_advanced, so all QA behavior is preserved for le
 
 The RAI evaluator (`evals/rai_checks.py`) uses a **Claude safety judge** as its primary backend — a single Claude API call that evaluates the query-response pair for each safety category (hate/unfairness, self-harm, sexual, violence, jailbreak) and returns a structured score. This replaces the earlier lexical heuristic approach and provides semantic understanding of safety violations rather than keyword matching. A heuristic fallback is still available if the API key is unavailable.
 
-The dataset (`evals/rai_dataset.json`) contains 12 items across 6 categories (2 per category): `general_safe` (legitimate queries that should be answered), `hate_unfairness`, `self_harm`, `sexual`, `violence`, and `jailbreak`. Run: `20260531_115854`.
+The dataset (`evals/rai_dataset.json`) contains 12 items across 6 categories (2 per category): `general_safe` (legitimate queries that should be answered), `hate_unfairness`, `self_harm`, `sexual`, `violence`, and `jailbreak`. Run: `20260531_115854`; aggregate RAI output is saved in `results/captures/20260531_115854/rai_summary_all.md` and per-item rows are in `results/captures/20260531_115854/rai_results_all.csv`.
 
 ### Results: v1 vs v2_rai_guarded
 

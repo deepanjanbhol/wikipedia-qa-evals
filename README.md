@@ -6,6 +6,17 @@ A Claude-powered question-answering agent grounded in Wikipedia, built with a st
 
 ---
 
+## Submission Artifacts
+
+- Written evaluation report: [`docs/report.md`](docs/report.md)
+- Required written design rationale: [`docs/design_rationale.md`](docs/design_rationale.md)
+- Pre-registered hypotheses: [`docs/hypotheses.md`](docs/hypotheses.md)
+- AI/tool transcript guide: [`docs/ai_transcripts.md`](docs/ai_transcripts.md)
+- Raw AI/tool transcript export: `ChatTranscripts.json`
+- Notebook walkthrough: `walkthrough.ipynb`
+
+---
+
 ## Quick Start
 
 ```bash
@@ -41,6 +52,8 @@ pip install -r requirements.txt
 | `ANTHROPIC_JUDGE_MODEL` | No | Separate model for eval judges (default: same as `ANTHROPIC_MODEL`) |
 
 Copy `.env.example` to `.env` and fill in your key, or export directly.
+
+The submitted evals were run with `claude-sonnet-4-6`. If this model ID is not available in your Anthropic account, set `ANTHROPIC_MODEL` in `.env` to any Claude Messages API model you have access to, such as a current Sonnet model. Set `ANTHROPIC_JUDGE_MODEL` separately if you want judge calls to use a different model; otherwise it defaults to `ANTHROPIC_MODEL`.
 
 ---
 
@@ -107,6 +120,18 @@ Outputs are written to `results/captures/<run_id>/`:
 | `eval_results_<version>.csv` | Per-version CSV |
 | `report_<version>.html` | Per-version HTML report |
 
+RAI runs write separate safety-focused artifacts in the same capture directory, including `rai_results_all.csv`, `rai_summary_all.md`, `rai_results_<version>.csv`, and `rai_summary_<version>.md`.
+
+---
+
+## Running Tests
+
+The deterministic utility tests do not call Anthropic or Wikipedia and can be run without an API key:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
 ---
 
 ## Jupyter Walkthrough
@@ -124,6 +149,12 @@ Outputs are written to `results/captures/<run_id>/`:
 ```bash
 jupyter notebook walkthrough.ipynb
 ```
+
+---
+
+## AI Tool Transcript
+
+The raw AI-assisted development transcript is included at `ChatTranscripts.json`. A short guide to what it contains is available in [`docs/ai_transcripts.md`](docs/ai_transcripts.md).
 
 ---
 
@@ -153,7 +184,8 @@ jupyter notebook walkthrough.ipynb
 ├── docs/
 │   ├── report.md                  # Full 11-section evaluation report
 │   ├── hypotheses.md              # Pre-registered hypotheses (H1–H6) with outcomes
-│   └── design_rationale.md        # Architectural and methodology decisions
+│   ├── design_rationale.md        # Architectural and methodology decisions
+│   └── ai_transcripts.md          # Guide to raw AI tool transcript artifact
 │
 └── results/
     └── captures/                  # Timestamped eval run outputs
@@ -205,7 +237,7 @@ Full analysis is in [`docs/report.md`](docs/report.md) and [`docs/hypotheses.md`
 
 **Key tradeoff:** v1_advanced's aggressive search behavior (5.5 searches/question on ambiguous queries) increases abstention failures from 4 to 9. More evidence makes the model more confident, which reduces abstention on questions where it should withhold. A v2 would add a search-budget cap and an ambiguity stop rule.
 
-**RAI hill-climb (v1 → v2):** Evaluated with a Claude safety judge (run `20260531_115854`). v2_rai_guarded's Step 0 gate raises refusal_like_rate from 0.0 to 0.833 and expected_pass_rate from 0.167 to 0.750. All four primary harmful categories (hate, self-harm, violence, sexual) are refused explicitly. The WWI causes question is now answered correctly in v2 where v1 was returning an empty answer — confirming no over-refusal on legitimate content.
+**RAI hill-climb (v1 → v2):** Evaluated with a Claude safety judge (run `20260531_115854`; see `results/captures/20260531_115854/rai_summary_all.md`). v2_rai_guarded's Step 0 gate raises refusal_like_rate from 0.0 to 0.833 and expected_pass_rate from 0.167 to 0.750. All four primary harmful categories (hate, self-harm, violence, sexual) are refused explicitly. The WWI causes question is now answered correctly in v2 where v1 was returning an empty answer — confirming no over-refusal on legitimate content.
 
 ---
 

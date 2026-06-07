@@ -22,6 +22,10 @@ The initial QA hill-climb used two prompt versions: `v0_base` and `v1_advanced`.
 
 The original prompt design included a `"Do not include chain-of-thought"` instruction in the base rules. This was removed after recognizing that it suppressed the intermediate reasoning that decomposition and grounding checks require. The instruction conflated output format (JSON only in the final message) with reasoning process (which should be unconstrained between tool calls). The corrected instruction reads: "You may think and reason between tool calls. Only your final message must be JSON."
 
+### RAI as an evaluation design decision
+
+Responsible AI was treated as part of the evaluation loop, not as a separate compliance checkbox. A Wikipedia QA system that answers accurately but behaves unsafely is still a failed system, so `v2_rai_guarded` and the RAI dataset were added to make safety behavior measurable in the same hill-climb framework as retrieval, grounding, and answer quality. The RAI slice tests explicit refusal behavior, jailbreak resistance, and over-refusal on benign questions. This kept the safety work connected to the central methodology of the project: define expected behavior, measure it, inspect failures, and use those failures to drive the next prompt iteration.
+
 ---
 
 ## 3. Evaluation Framework Design
@@ -52,7 +56,7 @@ An `answer_confidence` field was added to flag questions where the expected answ
 
 The primary finding was that correctness is a saturated metric for this benchmark with Claude Sonnet as the base model. Across all versions, correctness stayed near 4.7/5.0. This is not because the prompts are all equally good — it is because Claude Sonnet has extensive parametric knowledge of Wikipedia content and answers many questions correctly regardless of what the retrieved evidence contains. Correctness is therefore measuring the base model, not the RAG system. For future iterations, two options exist: use a weaker base model to widen the gap, or design harder questions that require specific retrieved evidence rather than general knowledge.
 
-The failure taxonomy told a more informative story. Retrieval failures dropped from 7 in v0 to 4 in v1_advanced, confirming that decomposition improved retrieval targeting. Abstention failures also dropped from 5 in v0 to 4 in v1_advanced, consistent with the grounding and abstention instructions taking effect. These are directional improvements, not large effect sizes, and with n=8 per slice per version a single question shifting its outcome represents a 12.5 percentage point change. All claims are therefore stated as directional and consistent with the hypotheses, not as confirmed results.
+The failure taxonomy told a more informative story. Retrieval failures dropped from 7 in v0 to 2 in v1_advanced, confirming that decomposition improved retrieval targeting. Abstention failures increased from 4 in v0 to 9 in v1_advanced, revealing a tradeoff: aggressive retrieval made the model more confident on ambiguous questions where it should have withheld or asked for clarification. These are directional improvements and tradeoffs, not large-effect statistical claims, and with n=4-6 per slice per version a single question can shift a slice-level rate by 17-25 percentage points. All claims are therefore stated as directional and consistent with the hypotheses, not as statistically confirmed results.
 
 The ambiguous slice was the most consistently problematic. Three of the four ambiguous questions (`amb_01`, `amb_02`, `amb_03`) failed across all versions — the model picked an interpretation and answered rather than flagging ambiguity. `amb_04` (Springfield population) was the exception: the model correctly listed multiple cities and asked for clarification. The inconsistency suggests that ambiguity detection is question-dependent rather than driven by the prompt version, which points toward adding an explicit ambiguity classifier as a next step.
 
