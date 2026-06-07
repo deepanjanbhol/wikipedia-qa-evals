@@ -1,0 +1,18 @@
+{
+  "executive_summary": "Evaluated 2 version(s): v0, v1. Overall correctness=4.583, completeness=4.417, faithfulness=4.75. Version snapshot: v0: correctness=4.5, citation=4.667, page_hit=1.0 | v1: correctness=4.667, citation=4.833, page_hit=1.0",
+  "went_well": [
+    "Correctness is strong (4.583).",
+    "Completeness is strong (4.417).",
+    "Citation support is strong (4.75).",
+    "Faithfulness is strong (4.75).",
+    "Context precision is strong (4.25).",
+    "Context recall is strong (4.417)."
+  ],
+  "not_well": [],
+  "recommendations": [
+    "Prioritize prompt changes that improve the top failure category and retest across all slices.",
+    "Review low-scoring slice/version combinations to tune decomposition and grounding instructions.",
+    "Track changes with the same dataset and compare per-version reports before promoting a prompt."
+  ],
+  "source": "heuristic"
+}

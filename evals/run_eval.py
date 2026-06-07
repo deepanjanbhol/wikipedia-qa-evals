@@ -1525,11 +1525,23 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Optional path to a dedicated RAI dataset JSON (default: evals/rai_dataset.json)",
     )
+    parser.add_argument(
+        "--model",
+        default=None,
+        help="Override ANTHROPIC_MODEL for this run (e.g. claude-haiku-3-5 for cross-model validation).",
+    )
     return parser
 
 
 if __name__ == "__main__":
     args = _build_parser().parse_args()
+
+    if args.model:
+        # Keep judge model as the original (avoid model judging itself at lower capability).
+        if not os.getenv("ANTHROPIC_JUDGE_MODEL"):
+            os.environ["ANTHROPIC_JUDGE_MODEL"] = os.getenv("ANTHROPIC_MODEL", "claude-sonnet-4-6")
+        os.environ["ANTHROPIC_MODEL"] = args.model
+
     versions: list[str] = []
     if args.versions:
         versions.extend([str(v).strip() for v in args.versions if str(v).strip()])

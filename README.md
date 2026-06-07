@@ -98,6 +98,9 @@ python -m evals.run_eval --versions v0 v1 v2
 # Limit to first 5 questions (quick smoke test)
 python -m evals.run_eval --versions v0 v1 --limit 5
 
+# Cross-model validation (run agent on Haiku, judges stay on Sonnet)
+python -m evals.run_eval --versions v0 v1 --model claude-haiku-4-5 --limit 6
+
 # Run RAI eval only
 python -m evals.run_eval --versions v1 v2 --mode rai
 
