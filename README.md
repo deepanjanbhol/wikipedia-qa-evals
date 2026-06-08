@@ -79,6 +79,7 @@ python main.py demo --version v1
 |---|---|---|
 | `v0` | `v0_base` | Naive single-search baseline — no decomposition, no abstention |
 | `v1` | `v1_advanced` | Decomposition + grounding self-check + abstention policy |
+| `v1b` | `v1b_ambiguity_fix` | v1 + search cap (max 2) + explicit abstention on ambiguous questions |
 | `v2` | `v2_rai_guarded` | v1 + explicit RAI gate at Step 0 |
 
 ---

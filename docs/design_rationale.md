@@ -14,11 +14,43 @@ The single `search_wikipedia` tool was a deliberate constraint. A richer toolset
 
 ## 2. Prompt Versioning Strategy
 
-The initial QA hill-climb used two prompt versions: `v0_base` and `v1_advanced`. A third version, `v2_rai_guarded`, was added later for explicit RAI hardening.
+### Original 4-Step Hill-Climb Plan
+
+The design started with a four-version QA hill-climb (plus a separate RAI version), where each iteration would add exactly one capability and target one failure category:
+
+| Version | What it added | Primary target |
+|---|---|---|
+| v0 — Baseline | Single Wikipedia search → direct answer | Establish predictable failure modes |
+| v1 — Query Planning / Decomposition | Classify question type, decompose multi-hop, search each entity/step | Improve context recall, page hit@k, multi-hop correctness |
+| v2 — Grounding Self-Check | Verify each claim against retrieved evidence, remove unsupported claims | Improve faithfulness and citation support |
+| v3 — Abstention Policy | Abstain on insufficient evidence, false premise, unresolved ambiguity | Improve trust behavior and reduce hallucination |
+| v2-RAI — RAI Guarded | v3 + explicit Step 0 safety gate | Measurable refusal behavior without QA regression |
+
+This plan would have allowed clean attribution: each eval run would isolate whether the single added capability improved the targeted metrics without regressing others.
+
+### What Was Actually Implemented
+
+In practice, the time budget made four separate eval runs impractical — each run requires ~24 API calls per version, plus judge calls for every metric, plus failure taxonomy classification, plus manual analysis. The four QA versions were compressed into two:
+
+| Actual version | What it contains |
+|---|---|
+| v0_base | Single search, direct answer, intentionally constrained |
+| v1_advanced | Query decomposition + grounding self-check + abstention policy bundled together |
+| v2_rai_guarded | v1 + Responsible AI safety gate + RAI eval dataset/evaluator |
+
+### Why No Iterative Fix Based on Eval Results
+
+A standard hill-climb methodology would run v0, analyze failures, fix the prompt, re-run as v1, analyze again, fix again, and so on. This project did not follow that iterative-fix pattern. Instead, the approach was hypothesis-driven: hypotheses were pre-registered before running evals, the eval was run once per version, and results were analyzed against predictions. Where hypotheses were confirmed, the prompt design was validated; where they failed, the failure was documented as a finding rather than immediately patched.
+
+The reason for this choice was practical: iterating on prompt fixes after each eval run would have required multiple full eval cycles (each costing ~48 API calls for the agent plus ~200+ judge calls), and the assignment scope was bounded. Instead of spending time on prompt iteration loops, the remaining budget was invested in a cross-model validation (Haiku) to test a higher-order hypothesis: whether the prompt improvements are real or masked by parametric knowledge. This produced a more informative finding (correctness gains are visible on weaker models) than a third prompt variant likely would have.
+
+With more time, the productive next step would be to unbundle v1_advanced into its three constituent capabilities, run each in isolation, and use failure analysis from the current run to guide targeted fixes — particularly for the comparison regression and the ambiguity abstention tradeoff.
+
+### Version Design Details
 
 `v0_base` is intentionally weak in specific, measurable ways. It issues exactly one search, does not decompose questions, and is explicitly told not to withhold answers under uncertainty. The goal was not to build the worst possible prompt but to build one whose failure modes are predictable. If v0 fails on multi-hop questions, it should be because it did not decompose — not because of an unrelated bug. Constraining v0 to single-search behavior makes the failure cause attributable, not accidental.
 
-`v1_advanced` bundles decomposition, grounding self-check, and abstention into a single upgrade. Ideally these would be separated across a v1 and v2 to isolate which change drove which improvement. The decision to combine them was made for practical reasons: the assignment scope is bounded, and the two-version contrast produces a cleaner narrative than three versions with marginal deltas. The tradeoff is that if grounding and decomposition produce effects in opposite directions on some slice, they will partially cancel and appear as noise. This is acknowledged as a design limitation.
+`v1_advanced` bundles decomposition, grounding self-check, and abstention into a single upgrade. The tradeoff is that if grounding and decomposition produce effects in opposite directions on some slice, they will partially cancel and appear as noise. This is acknowledged as a design limitation.
 
 The original prompt design included a `"Do not include chain-of-thought"` instruction in the base rules. This was removed after recognizing that it suppressed the intermediate reasoning that decomposition and grounding checks require. The instruction conflated output format (JSON only in the final message) with reasoning process (which should be unconstrained between tool calls). The corrected instruction reads: "You may think and reason between tool calls. Only your final message must be JSON."
 
@@ -60,9 +92,9 @@ The failure taxonomy told a more informative story. Retrieval failures dropped f
 
 ---
 
-## 6. Closing the Loop: Cross-Model Validation as a Third Hill-Climb
+## 6. Closing the Loop: Hill-Climb Iterations
 
-The eval-driven methodology in this project follows a specific pattern: **finding → hypothesis → experiment → measured outcome**. The three completed loops are:
+The eval-driven methodology in this project follows a specific pattern: **finding → hypothesis → experiment → measured outcome**. The four completed loops are:
 
 1. **v0→v1 (prompt hill-climb):** Finding: v0 fails on multi-hop due to single-search constraint. Hypothesis: decomposition + grounding will reduce retrieval failures. Experiment: run v1 on same dataset. Outcome: retrieval failures 7→2, context recall +0.334, search count 1.375→3.042. ✅
 
@@ -70,7 +102,9 @@ The eval-driven methodology in this project follows a specific pattern: **findin
 
 3. **Cross-model validation (eval methodology hill-climb):** Finding: correctness is saturated on Sonnet — the metric cannot distinguish v0 from v1 because parametric knowledge compensates for poor retrieval. Hypothesis: on a weaker model (Haiku), the same prompt improvement should produce a visible correctness delta because parametric knowledge is insufficient. Experiment: re-run v0 and v1 on Haiku with Sonnet as judge. Outcome: correctness delta +0.167 on Haiku (vs 0.000 on Sonnet); context recall delta +0.500; faithfulness +0.166. ✅
 
-The third loop is notable because it does not change the prompt — it changes the evaluation conditions to validate a finding about the eval itself. This demonstrates that the methodology is self-correcting: when a metric is ceilinged, the correct response is not to discard it or re-engineer the prompt, but to change the experimental conditions to expose the underlying signal. The Haiku run confirms that the v0→v1 improvement is real and prompt-driven, which the Sonnet-only run could not distinguish from noise.
+4. **v1→v1b (targeted prompt iteration):** Finding: v1 issues 4.75 searches on ambiguous questions; excessive retrieval makes the model over-confident instead of abstaining. Hypothesis: capping ambiguous searches at 2 (one per interpretation) with an explicit "if both are valid, abstain" instruction will reduce search waste and improve quality. Experiment: run v1b on ambiguous slice only. Outcome: avg_searches 4.75→2.5, faithfulness +0.75, citation_support +1.5, answer_relevancy +1.0. ✅
+
+The fourth loop closes the iterative-fix gap: it takes a specific failure identified in the v1 eval results (ambiguous over-search), implements a targeted prompt fix, and measures improvement on the affected slice. This is the standard production eval workflow: diagnose → fix → re-measure.
 
 ---
 

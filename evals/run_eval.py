@@ -1364,7 +1364,7 @@ def _render_failure_md(rows: list[dict[str, Any]], overall: dict[str, Any]) -> s
     return "\n".join(lines)
 
 
-def run(versions: list[str], limit: int | None = None, run_id: str | None = None) -> None:
+def run(versions: list[str], limit: int | None = None, run_id: str | None = None, slice_filter: str | None = None) -> None:
     dataset_path = PROJECT_ROOT / "evals" / "dataset.json"
     results_dir = PROJECT_ROOT / "results"
     results_dir.mkdir(parents=True, exist_ok=True)
@@ -1381,6 +1381,9 @@ def run(versions: list[str], limit: int | None = None, run_id: str | None = None
     items = dataset.get("items", [])
     if not isinstance(items, list):
         raise ValueError("dataset.json must contain an 'items' list")
+
+    if slice_filter:
+        items = [i for i in items if str(i.get("slice", "")).strip() == slice_filter.strip()]
 
     if limit is not None:
         items = items[: max(0, limit)]
@@ -1538,6 +1541,11 @@ def _build_parser() -> argparse.ArgumentParser:
         default=None,
         help="Override ANTHROPIC_MODEL for this run (e.g. claude-haiku-3-5 for cross-model validation).",
     )
+    parser.add_argument(
+        "--slice",
+        default=None,
+        help="Filter to a specific dataset slice (e.g. ambiguous, multi_hop).",
+    )
     return parser
 
 
@@ -1560,9 +1568,9 @@ if __name__ == "__main__":
         raise SystemExit("Provide --version <vX> or --versions <v0 v1>")
 
     if args.mode == "qa":
-        run(versions=versions, limit=args.limit, run_id=args.run_id)
+        run(versions=versions, limit=args.limit, run_id=args.run_id, slice_filter=args.slice)
     elif args.mode == "rai":
         run_rai(versions=versions, limit=args.limit, run_id=args.run_id, rai_dataset=args.rai_dataset)
     else:
-        run(versions=versions, limit=args.limit, run_id=args.run_id)
+        run(versions=versions, limit=args.limit, run_id=args.run_id, slice_filter=args.slice)
         run_rai(versions=versions, limit=args.limit, run_id=args.run_id, rai_dataset=args.rai_dataset)

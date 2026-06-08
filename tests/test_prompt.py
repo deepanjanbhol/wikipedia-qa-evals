@@ -9,6 +9,7 @@ class PromptVersionTests(unittest.TestCase):
     def test_resolves_short_aliases(self) -> None:
         self.assertEqual(resolve_prompt_version("v0"), "v0_base")
         self.assertEqual(resolve_prompt_version("v1"), "v1_advanced")
+        self.assertEqual(resolve_prompt_version("v1b"), "v1b_ambiguity_fix")
         self.assertEqual(resolve_prompt_version("v2"), "v2_rai_guarded")
 
     def test_unknown_version_falls_back_to_default(self) -> None:
@@ -21,7 +22,7 @@ class PromptVersionTests(unittest.TestCase):
         self.assertIn("search_wikipedia", prompt)
 
     def test_list_prompt_versions_contains_all_canonical_versions(self) -> None:
-        self.assertEqual(set(list_prompt_versions()), {"v0_base", "v1_advanced", "v2_rai_guarded"})
+        self.assertEqual(set(list_prompt_versions()), {"v0_base", "v1_advanced", "v1b_ambiguity_fix", "v2_rai_guarded"})
 
 
 if __name__ == "__main__":

@@ -131,6 +131,47 @@ Step 5 — Finalize answer:
   If evidence conflicts, mention conflict and reduce confidence.
 """.strip(),
     },
+    "v1b_ambiguity_fix": {
+        "name": "v1b_ambiguity_fix",
+        "description": "v1_advanced with a targeted fix for ambiguous questions: search cap at 2, "
+                       "mandatory abstention when multiple interpretations are plausible.",
+        "instructions": """
+Step 1 — Classify the question:
+  simple_factoid | multi_hop | comparison | ambiguous
+
+Step 2 — Plan and execute searches by type:
+  - simple_factoid: one focused search on the primary entity/fact.
+  - multi_hop: decompose into ordered sub-questions; search each hop in sequence and carry entities forward.
+  - comparison: search each entity separately, then synthesize common dimensions.
+  - ambiguous: search EXACTLY two likely interpretations (one search each, max 2 total).
+    After both searches complete, STOP searching. Do NOT issue further searches.
+    If both interpretations returned valid Wikipedia results, the question IS ambiguous —
+    proceed directly to Step 4 (abstention). Do NOT pick one interpretation.
+
+Step 3 — Grounding self-check before writing the answer:
+  For each factual claim, verify it is explicitly supported in retrieved text.
+  Remove claims that are not directly supported.
+
+Step 4 — Abstention and clarification check:
+  Abstain if ANY of the following apply:
+    a) The question assumes a false or impossible premise.
+    b) The question is ambiguous: multiple valid interpretations exist.
+       In this case, list the interpretations found and ask the user to clarify.
+       Example: "This question is ambiguous. Did you mean X or Y? Please clarify."
+    c) After grounding checks, no supported claim remains.
+  When abstaining for ambiguity (case b):
+    answer = "This question is ambiguous. [list interpretations]. Please clarify which you mean."
+    confidence = "low"
+  When abstaining for other reasons:
+    answer = "I could not find sufficient support in the retrieved Wikipedia evidence."
+    confidence = "low"
+
+Step 5 — Finalize answer (only if NOT abstaining):
+  Use only grounded claims.
+  Keep the answer concise and include source URLs for all supporting pages.
+  If evidence conflicts, mention conflict and reduce confidence.
+""".strip(),
+    },
 }
 
 
@@ -138,6 +179,7 @@ PROMPT_VERSION_ALIASES = {
     # Current short aliases.
     "v0": "v0_base",
     "v1": "v1_advanced",
+    "v1b": "v1b_ambiguity_fix",
     "v2": "v2_rai_guarded",
     # Backward-compatible canonical names.
     "v0_baseline": "v0_base",

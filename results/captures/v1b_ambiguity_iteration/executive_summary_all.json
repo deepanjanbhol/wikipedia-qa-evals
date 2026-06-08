@@ -1,0 +1,21 @@
+{
+  "executive_summary": "Evaluated 2 version(s): v1, v1b. Overall correctness=3.875, completeness=3.25, faithfulness=4.125. Version snapshot: v1: correctness=3.75, citation=2.25, page_hit=0.75 | v1b: correctness=4.0, citation=3.75, page_hit=1.0",
+  "went_well": [
+    "Faithfulness is strong (4.125).",
+    "Retrieval hit rate is high (0.875)."
+  ],
+  "not_well": [
+    "Correctness is moderate (3.875).",
+    "Completeness is weak (3.25).",
+    "Citation support is weak (3.0).",
+    "Context precision is weak (3.0).",
+    "Context recall is moderate (3.375).",
+    "Abstention quality pass rate is low (0.75)."
+  ],
+  "recommendations": [
+    "Prioritize prompt changes that improve the top failure category and retest across all slices.",
+    "Review low-scoring slice/version combinations to tune decomposition and grounding instructions.",
+    "Track changes with the same dataset and compare per-version reports before promoting a prompt."
+  ],
+  "source": "heuristic"
+}

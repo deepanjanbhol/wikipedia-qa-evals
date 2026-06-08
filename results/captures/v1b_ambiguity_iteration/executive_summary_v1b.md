@@ -1,0 +1,29 @@
+# Executive Summary
+
+Source: claude
+
+v1b on ambiguous queries shows strong retrieval and faithfulness but critically fails at ambiguity handling—3 of 4 cases resulted in Ambiguity Failures with zero abstention triggering, indicating the model never withholds answers when queries are unclear.
+
+## What Went Well
+
+- Perfect page hit rate (1.0) confirms retrieval consistently surfaces relevant documents.
+- High faithfulness score (4.5/5) shows generated answers closely follow retrieved context.
+- Answer relevancy (4.25/5) and correctness (4.0/5) are solid given the ambiguous query set.
+- Abstention quality pass rate (0.75) suggests when abstention occurs, quality is acceptable.
+
+## What Did Not Go Well
+
+- Abstention trigger rate is 0.0—model never abstains despite all queries being ambiguous.
+- 3 of 4 failures are Ambiguity Failures; model attempts answers instead of seeking clarification.
+- Context precision (3.25/5) and completeness (3.5/5) are notably weaker metrics.
+- Citation support (3.75/5) indicates sourcing gaps that undermine answer trustworthiness.
+- Small sample size (n=4) limits statistical confidence in all reported metrics.
+
+## Recommendations
+
+- Implement explicit ambiguity detection logic to trigger clarification requests before answering unclear queries.
+- Add abstention training examples covering ambiguous inputs to improve trigger rate from zero.
+- Improve context precision by refining chunk selection or re-ranking to reduce noise in retrieved passages.
+- Strengthen citation grounding to close the gap between faithfulness (4.5) and citation support (3.75).
+- Expand evaluation set beyond 4 samples to achieve statistically reliable ambiguity-slice metrics.
+- Define a minimum abstention trigger threshold (e.g., ≥0.5) as a hard pass/fail gate for future runs.

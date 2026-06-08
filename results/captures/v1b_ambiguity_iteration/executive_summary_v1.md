@@ -1,0 +1,28 @@
+# Executive Summary
+
+Source: claude
+
+V1 on the ambiguity slice shows moderate retrieval and faithfulness but critically fails at ambiguity handling: only 25% of ambiguous queries trigger abstention, and citation support is weak at 2.25/5.
+
+## What Went Well
+
+- Page hit rate is solid at 75%, indicating retrieval finds relevant pages most of the time.
+- Faithfulness and correctness both score 3.75/5, suggesting grounded and accurate responses when answers are attempted.
+- Abstention quality pass rate at 75% means when abstention does trigger, it is handled appropriately.
+- Answer relevancy at 3.25/5 shows responses are generally on-topic despite ambiguity challenges.
+
+## What Did Not Go Well
+
+- Abstention trigger rate is only 25%; 3 of 4 ambiguous queries received answers instead of clarification requests.
+- Abstention consistency rate is critically low at 25%, indicating unreliable behavior across similar ambiguous inputs.
+- Citation support scores 2.25/5, the lowest metric, signaling poor source attribution in responses.
+- Context precision at 2.75/5 suggests retrieved context contains significant irrelevant content.
+- Three ambiguity failures and one abstention failure represent a high failure rate across just 4 cases.
+
+## Recommendations
+
+- Strengthen ambiguity detection logic to increase abstention trigger rate from 25% toward at least 70%.
+- Implement consistency tests for borderline queries; enforce deterministic abstention thresholds to fix consistency rate.
+- Improve citation generation pipeline to increase citation support score above 3.5/5.
+- Tune retrieval reranking to reduce noise and raise context precision above 3.5/5.
+- Expand ambiguity slice test cases beyond 4 samples to ensure statistically reliable evaluation.
