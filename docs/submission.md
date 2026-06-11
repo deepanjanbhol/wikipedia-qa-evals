@@ -62,8 +62,8 @@ python agent/wikipedia_tool.py "Pride and Prejudice"
 
 ## Submission Packet
 
-- [x ] GitHub repo URL
-- [x ] Video upload/link
-- [x ] Written rationale/report links
-- [x ] AI transcript artifact noted
-- [x ] Any caveats clearly documented, especially metric limitations and known scoring debt
+- [x] GitHub repo URL
+- [x] Video upload/link
+- [x] Written rationale/report links
+- [x] AI transcript artifact noted
+- [x] Any caveats clearly documented, especially metric limitations and known scoring debt

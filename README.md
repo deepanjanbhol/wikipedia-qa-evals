@@ -2,7 +2,8 @@
 
 A Claude-powered question-answering agent grounded in Wikipedia, built with a structured eval-driven methodology. The project demonstrates a full hypothesis → evaluation → failure analysis → iteration loop across prompt versions (v0/v1 for QA hill-climb, then v2 for RAI hardening).
 
-**Assignment:** Anthropic Engineering Manager — Agent Prompts & Evals
+**Assignment:** Anthropic Engineering Manager — Agent Prompts & Evals  
+**Time spent:** ~3.5 hours of focused implementation (code, eval framework, core artifacts). Documentation polish, presentation, and video handled separately.
 
 ---
 
